@@ -1,0 +1,55 @@
+
+# download the data from  https://www.kaggle.com/datasets/fanconic/skin-cancer-malignant-vs-benign/code
+# If you will use google colab for this tutorial, you need to upload the data to your google drive. then mount your drive in the google colab. you need to change train_path, test_path
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from keras.models import Sequential
+from keras.layers import Dense, Flatten
+from keras.applications.vgg16 import VGG16
+
+# Example model (you can replace this with your own model)
+base_model = VGG16(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+model = Sequential([
+    base_model,
+    Flatten(),
+    Dense(128, activation='relu'),
+    Dense(1, activation='sigmoid')  # For 3-class classification, adjust accordingly
+])
+
+# Compile the model
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+# Create ImageDataGenerators for training and validation data
+train_datagen = ImageDataGenerator(rescale=1.0/255, rotation_range=40, width_shift_range=0.2,
+                                   height_shift_range=0.2, shear_range=0.2, zoom_range=0.2,
+                                   horizontal_flip=True, fill_mode='nearest')
+
+val_datagen = ImageDataGenerator(rescale=1.0/255)  # Only rescale for validation
+
+
+train_path ='/content/drive/MyDrive/Colab Notebooks/data/train'
+test_path ='/content/drive/MyDrive/Colab Notebooks/data/test'
+# Flow training data in batches
+train_generator = train_datagen.flow_from_directory(
+    train_path,  # Replace with your training data directory
+    target_size=(224, 224),
+    batch_size=32,
+    class_mode='binary'  # For multi-class classification
+)
+
+# Flow validation data in batches
+validation_generator = val_datagen.flow_from_directory(
+    test_path,  # Replace with your validation data directory
+    target_size=(224, 224),
+    batch_size=32,
+    class_mode='binary'  # For multi-class classification
+)
+
+# Fit the model using both training and validation generators
+history = model.fit(
+    train_generator,
+    steps_per_epoch=train_generator.samples // train_generator.batch_size,  # Total batches per epoch
+    epochs=10,  # Number of epochs
+    validation_data=validation_generator,  # Validation generator
+    validation_steps=validation_generator.samples // validation_generator.batch_size,  # Total batches for validation
+    verbose=2
+)
