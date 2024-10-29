@@ -306,13 +306,13 @@ model.summary()
 
 base_model.summary()
 
-# feature extraction using VGG 16, model type sequential
+# develop Transfer Learning entire Fine-Tuning model using VGG 16 with modificatyions
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from keras.models import Model
 from keras.layers import Dense, Flatten, Dropout
 from keras.applications.vgg16 import VGG16
 
-# Example model (you can replace this with your own model)
+# Example model (you can replace this with your any other pre-trained model)
 base_model = VGG16(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
 
 
